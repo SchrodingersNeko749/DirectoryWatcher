@@ -29,8 +29,11 @@ namespace DirectoryWatcher
             string value = $"Created: {e.FullPath}";
             string file = e.Name;
 
-            string destinationPath = MIMEAssistant.GetMIMEType(e.Name);
-            Console.WriteLine($"Created: {file}\n moving to {destinationPath}");
+            string destinationPath = MIMEAssistant.GetMIMEType(file);
+            if(destinationPath != "unknown/unknown")
+                Console.WriteLine($"Created: {file}\n moving to {destinationPath}");
+            else
+                Console.WriteLine("Unkown File");
 
             MoveFileToFolder(file, destinationPath);
         }
@@ -60,8 +63,18 @@ namespace DirectoryWatcher
             var sourceFile = Path.Combine(sourceFolder,file);
             
             Directory.CreateDirectory(destinationPath);
+            if(File.Exists(destinationFile))
+                {
+                    int fCount = Directory.GetFiles(destinationPath, $"{Path.GetFileNameWithoutExtension(file)}*", SearchOption.AllDirectories).Length;
 
-            File.Move(sourceFile, destinationFile);
+                    var indexedFile = $"{Path.GetFileNameWithoutExtension(file)}{fCount}{Path.GetExtension(file)}";
+                    var indexedFile_Path = Path.Combine(destinationPath,indexedFile);
+
+                    Console.WriteLine($"file already exists, renaming to {indexedFile}");
+                    File.Move(sourceFile, indexedFile_Path);
+                }
+            else
+                File.Move(sourceFile, destinationFile);
         }
     }
 }
